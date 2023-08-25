@@ -1,0 +1,13 @@
+Logistic Regression
+Decision Tree
+Random Forest
+Gradient Boosting
+Neural Networks
+Linear Regression
+B. Objective: Kopi - ningkat jumlah pembeli kopi
+B. Understanding 
+start > marketing (prediksi jmlh leads dari budget ads) > leads lihat produk (rekomendasi) > sales hubungi leads (prioritasi leads=kerja Sales efektif) > leads beli produk > end
+D. Avaible: graph data budget & sales
+Prediction Objective: budget 5M = brp sales?=rumus Least Square, 180+10X
+
+sns.boxplot(data=df, orient='horizontal')

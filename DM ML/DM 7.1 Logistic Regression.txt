@@ -1,0 +1,65 @@
+﻿import pandas as pd
+df = pd.read_csv('heart.csv')
+df.info()
+df.isnull().sum()
+
+Encoding
+!pip install category_encoders #df['Sex'].value_counts()
+print(len(df['Sex'].unique()))
+print(len(df['ChestPainType'].unique()))
+print(len(df['RestingECG'].unique()))
+print(len(df['ExerciseAngina'].unique()))
+print(len(df['ST_Slope'].unique()))
+
+from category_encoders import TargetEncoder
+encoder_1 = TargetEncoder()
+df['ChestPainType'] = encoder_1.fit_transform(df['ChestPainType'], df['HeartDisease'])
+encoder_2 = TargetEncoder()
+df['Sex'] = encoder_2.fit_transform(df['Sex'], df['HeartDisease'])
+encoder_3 = TargetEncoder()
+df['RestingECG'] = encoder_3.fit_transform(df['RestingECG'], df['HeartDisease'])
+encoder_4 = TargetEncoder()
+df['ExerciseAngina'] = encoder_4.fit_transform(df['ExerciseAngina'], df['HeartDisease'])
+encoder_5 = TargetEncoder()
+df['ST_Slope'] = encoder_5.fit_transform(df['ST_Slope'], df['HeartDisease'])
+df.head()
+
+Normalization
+from sklearn.preprocessing import MinMaxScaler
+exclude = ['Sex', 'ChestPainType', 'RestingECG', 'ExerciseAngina', 'ST_Slope', 'HeartDisease']
+for i in df.columns:
+  if i not in exclude:
+    scaler = MinMaxScaler()
+    df[i] = scaler.fit_transform(df[i].values.reshape(-1,1))
+df.head()
+
+Correlation
+df.corr()
+
+Model
+from sklearn.model_selection import train_test_split
+y = df['HeartDisease']
+X = df.drop('HeartDisease', axis=1)
+X_train_1, X_test_1, y_train_1, y_test_1 = train_test_split(X, y, test_size=0.2)
+X_train_2, X_test_2, y_train_2, y_test_2 = train_test_split(X, y, test_size=0.3)
+
+Logistic Regression
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression()
+model.fit(X_train_1, y_train_1)
+y_pred_1 = model.predict(X_test_1)
+
+model_2 = LogisticRegression()
+model_2.fit(X_train_2, y_train_2)
+model_2.score(X_test_2, y_test_2)
+y_pred_2 = model.predict(X_test_2)
+
+Confusion Matrix
+from sklearn.metrics import confusion_matrix, classification_report
+confusion_matrix(y_test_1, y_pred_1)
+a = classification_report(y_test_1, y_pred_1)
+print(a)
+
+confusion_matrix(y_test_2, y_pred_2)
+a = classification_report(y_test_2, y_pred_2)
+print(a)

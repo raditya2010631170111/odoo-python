@@ -1,0 +1,108 @@
+MV
+Encoding
+standarisasi atau normalization
+Selection Feature
+Regresi atau Klasifikasi
+Evaluate
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+df = pd.read_csv("https://raw.githubusercontent.com/raditya2010631170111/df_20111/main/Travel.csv")
+from google.colab import files
+files.upload()
+
+df[['area_mean']].tail() //df.head() 
+df[['area_mean']].describe()
+df.info() //df['Age'] //cek stlh missing value
+df.columns
+df.dtypes //Prak 4
+
+del df ['Unnamed: 32']
+df.isnull().any() //isna() .sum()
+
+membuang missing value=MV, metode=M, deletion=D, scaler/ing=S, encoder/ing=E
+df['Age'].dropna() //M. Listwise D.
+
+NaN dgn mean
+df['Age'] = df['Age'].fillna((df['Age'].mean()))
+
+DM 4-5
+Seleksi fitur
+X = df.drop(['id', 'satisfaction'], axis=1)
+Y = df[['satisfaction']]
+Y.tail()
+
+MDVP:Fo = threshold/batas=0 agar bisa tau Fo
+10% konstan = dihapus Row = harus bervariasi
+apabila data ada yg mirip2 akan tdk dihapus
+apabila lbh dari 10% dihapus
+- if 0/100% = hapus semuanya
+
+174.188 = bisa konstan
+prediktor=high variance, target=low variance/hapus konstan=variance threahold
+seleksi fitur=prediktor bnyk=lama proses
+reduksi dimensi=memperkecil dimensi data ke rendah
+kolom=fitur/variable/atribut
+row=data/record
+
+cek fitur konstan
+from sklearn.feature_selection import VarianceThreshold
+var_threshold = VarianceThreshold(threshold = 0) konstan // = 0.1 quasi-konstan=90%
+var_threshold.fit(X)
+var_threshold.get_support()
+
+menghapus fitur konstan
+low_var_cols = [column for column in X.columns
+         if column not in X.columns[var_threshold.get_support()]]
+for col in low_var_cols:
+    print(col)
+	
+X_high = X.drop(low_var_cols, axis=1)
+X_high.sample(5)
+
+var_threshold.fit(X_high)
+var_threshold.get_support()
+
+Chi-square
+from sklearn.feature_selection import chi2
+
+df=pd.read_csv('BankChurners.csv')
+df.head()
+
+X = 
+df.drop(["Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1", "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2"], axis=1)
+X.head()
+
+dataku2 = X.drop('CLIENTNUM', axis=1)
+dataku2.head()
+
+dataku2.dtypes
+
+Drop Unrequired Columns
+df_bank = df_bank.drop([
+    'Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1'
+    , 'Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2'
+], axis=1)
+//df_bank = df_bank.drop(['CLIENTNUM'], axis=1)
+df_bank.columns
+
+Encode DM 7.1 Logistic 
+Fitur2 kategori>numerikal: D disceretization
+
+Chi-square test
+X = df_bank.drop(["Attrition_Flag"], axis=1)
+y = df_bank['Attrition_Flag']
+
+chi_score = chi2(X, y)
+chi_score
+
+p_values = pd.Series(chi_score[1],index = X.columns)
+p_values.sort_values(ascending = False , inplace = True)
+
+p_values.plot.bar()
+plt.show()
+
+X = X.drop(['Education_Level', 'Card_Category', 'Marital_Status'], axis=1)
+X.tail()

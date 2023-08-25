@@ -1,0 +1,116 @@
+from datetime import datetime
+import numpy as np             
+import pandas as pd            
+import matplotlib.pylab as plt 
+%matplotlib inline             
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import acf, pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.arima_model import ARIMA
+from matplotlib.pylab import rcParams
+rcParams['figure.figsize'] = 10, 6
+df = pd.read_csv('https://raw.githubusercontent.com/raditya2010631170111/df_20111/main/AirPassengers.csv')
+df.head()
+
+numerikal > datetime
+df['Month'] = pd.to_datetime(df['Month'],infer_datetime_format=True) 
+indexedData = df.set_index(['Month'])
+indexedData.head()
+
+EDA explorasi data analysis
+plt.xlabel('Date')
+plt.ylabel('Number of air passengers')
+plt.plot(indexedData)
+
+tiap naik=bulan
+awal tahun=naik, pertengan tahun=tertinggi, akhir tahun=turun = sifat seasonal data vs sifat stationer=tdk berpola
+
+rolmean = indexedData.rolling(window=12).mean() #determine rolling statistics: windows=1 #/bulan
+rolstd = indexedData.rolling(window=12).std()
+
+#Plot rolling statistics
+orig = plt.plot(indexedData, color='blue', label='Original')
+mean = plt.plot(rolmean, color='red', label='Rolling Mean')
+std = plt.plot(rolstd, color='black', label='Rolling Std')
+plt.legend(loc='best')
+plt.title('Rolling Mean & Standard Deviation')
+plt.show(block=False)
+
+garis mean 1950=mean 12 bulan sebelumnya
+
+Augmented Dickey–Fuller test
+print('Results of Dickey Fuller Test:')
+dftest = adfuller(indexedData['#Passengers'], autolag='AIC')
+dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value','#Lags Used','Number of Observations Used'])
+for key,value in dftest[4].items():
+    dfoutput['Critical Value (%s)'%key] = value
+print(dfoutput)
+
+1. H0 (Hipotesis null)           = data non stationer    | GAGAL DITOLAK p-value >  confidence interval=0.5
+2. Ha (Hipotesis alternative) = data BUKAN non stationer | GAGAL DITOLAK p-value <=  confidence interval=0.5
+critical value 1-10% == Test Statistic = stationary
+tingkat keyakinan/confidence=90% = sisa 5%=0.05
+
+Data Transformation dgn Log Scale: numerikal > log
+indexedDataset_logScale = np.log(indexedData)
+plt.plot(indexedDataset_logScale)
+
+#The below transformation is required to make series stationary
+movingAverage = indexedDataset_logScale.rolling(window=12).mean()
+movingSTD = indexedDataset_logScale.rolling(window=12).std()
+plt.plot(indexedDataset_logScale)
+plt.plot(movingAverage, color='red')
+
+#Remove NAN values
+datasetLogScaleMinusMovingAverage = indexedDataset_logScale - movingAverage
+datasetLogScaleMinusMovingAverage.head(12)
+datasetLogScaleMinusMovingAverage.dropna(inplace=True) #alternative: .fillna()
+
+non stationary > stationary
+#Determine rolling statistics
+movingAverage = datasetLogScaleMinusMovingAverage.rolling(window=12).mean()
+movingSTD = datasetLogScaleMinusMovingAverage.rolling(window=12).std()
+#Plot rolling statistics
+orig = plt.plot(datasetLogScaleMinusMovingAverage, color='blue', label='Original')
+mean = plt.plot(movingAverage, color='red', label='Rolling Mean')
+std = plt.plot(movingSTD, color='black', label='Rolling Std')
+plt.legend(loc='best')
+plt.title('Rolling Mean & Standard Deviation')
+plt.show(block=False)
+datasetLogScaleMinusMovingAverage.head(10)
+
+Modelling ARIMA
+model = ARIMA(indexedDataset_logScale, order=(2,1,2))
+results_ARIMA = model.fit(disp=-1)
+plt.plot(datasetLogDiffShifting)
+plt.plot(results_ARIMA.fittedvalues, color='red')
+plt.title('RSS: %.4f'%sum((results_ARIMA.fittedvalues - datasetLogDiffShifting['#Passengers'])**2))
+print('Plotting ARIMA model')
+
+data actual=biru
+ARIMA = merah
+
+predictions_ARIMA_diff = pd.Series(results_ARIMA.fittedvalues, copy=True)
+print(predictions_ARIMA_diff.head())
+
+Convert Back To Original Time Series (Before Transformation)
+
+#Convert to cumulative sum
+predictions_ARIMA_diff_cumsum = predictions_ARIMA_diff.cumsum()
+
+predictions_ARIMA_log = pd.Series(indexedDataset_logScale['#Passengers'].iloc[0], index=indexedDataset_logScale.index)
+predictions_ARIMA_log = predictions_ARIMA_log.add(predictions_ARIMA_diff_cumsum, fill_value=0)
+predictions_ARIMA_log.head()
+
+# Inverse of log is exp.
+predictions_ARIMA = np.exp(predictions_ARIMA_log)
+plt.plot(indexedData)
+plt.plot(predictions_ARIMA)
+
+Forecast
+#We have 144(existing data of 12 yrs in months) data points. 
+#And we want to forecast for additional 120 data points or 10 yrs.
+results_ARIMA.plot_predict(1,264) 
+
+abu-abu=confidence=perkiraan apabila forecast salah tdk akan melebihi batas melesatan itu
+mirip MAE=bisa lebih atau kurang: MAE = 100

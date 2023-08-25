@@ -1,1 +1,1 @@
-# odoo-python
+# colaboratory-python
